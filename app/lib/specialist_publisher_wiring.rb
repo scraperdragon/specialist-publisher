@@ -74,39 +74,38 @@ SpecialistPublisherWiring = DependencyContainer.new do
     }
   }
 
-  define_singleton(:aaib_report_repository) do
-    SpecialistDocumentRepository.new(
-      specialist_document_editions: SpecialistDocumentEdition.where(document_type: "aaib_report"),
-      document_factory: get(:validatable_aaib_report_factory),
+  define_factory(:repository_registry) {
+    RepositoryRegistry.new(
+      entity_factories: get(:validatable_entity_factories),
     )
+  }
+
+  define_factory(:validatable_entity_factories) {
+    ValidatableEntityFactoryRegistry.new(get(:entity_factories))
+  }
+
+  define_factory(:entity_factories) {
+    EntityFactoryRegistry.new
+  }
+
+  define_singleton(:aaib_report_repository) do
+    get(:repository_registry).aaib_report_repository
   end
 
   define_singleton(:cma_case_repository) do
-    SpecialistDocumentRepository.new(
-      specialist_document_editions: SpecialistDocumentEdition.where(document_type: "cma_case"),
-      document_factory: get(:validatable_cma_case_factory),
-    )
+    get(:repository_registry).cma_case_repository
   end
 
   define_singleton(:drug_safety_update_repository) do
-    SpecialistDocumentRepository.new(
-      specialist_document_editions: SpecialistDocumentEdition.where(document_type: "drug_safety_update"),
-      document_factory: get(:validatable_drug_safety_update_factory),
-    )
+    get(:repository_registry).drug_safety_update_repository
   end
 
   define_singleton(:medical_safety_alert_repository) do
-    SpecialistDocumentRepository.new(
-      specialist_document_editions: SpecialistDocumentEdition.where(document_type: "medical_safety_alert"),
-      document_factory: get(:validatable_medical_safety_alert_factory),
-    )
+    get(:repository_registry).medical_safety_alert_repository
   end
 
   define_singleton(:international_development_fund_repository) do
-    SpecialistDocumentRepository.new(
-      specialist_document_editions: SpecialistDocumentEdition.where(document_type: "international_development_fund"),
-      document_factory: get(:validatable_international_development_fund_factory),
-    )
+    get(:repository_registry).international_development_fund_repository
   end
 
   define_singleton(:manual_specific_document_repository_factory) do
@@ -191,7 +190,7 @@ SpecialistPublisherWiring = DependencyContainer.new do
 
   define_factory(:cma_case_builder) {
     CmaCaseBuilder.new(
-      get(:validatable_cma_case_factory),
+      get(:validatable_entity_factories).cma_case_factory,
       IdGenerator,
     )
   }
@@ -201,13 +200,7 @@ SpecialistPublisherWiring = DependencyContainer.new do
       SlugUniquenessValidator.new(
         get(:cma_case_repository),
         CmaCaseValidator.new(
-          CmaCase.new(
-            SpecialistDocument.new(
-              SlugGenerator.new(prefix: "cma-cases"),
-              get(:edition_factory),
-              *args,
-            ),
-          ),
+
         ),
       )
     }
@@ -221,26 +214,6 @@ SpecialistPublisherWiring = DependencyContainer.new do
   }
 
   define_factory(:validatable_aaib_report_factory) {
-    ->(*args) {
-      SlugUniquenessValidator.new(
-        get(:aaib_report_repository),
-        AaibReportValidator.new(
-          get(:aaib_report_factory).call(*args),
-        ),
-      )
-    }
-  }
-
-  define_factory(:aaib_report_factory) {
-    ->(*args) {
-      AaibReport.new(
-        SpecialistDocument.new(
-          SlugGenerator.new(prefix: "aaib-reports"),
-          get(:edition_factory),
-          *args,
-        )
-      )
-    }
   }
 
   define_factory(:drug_safety_update_builder) {
