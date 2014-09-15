@@ -208,96 +208,30 @@ SpecialistPublisherWiring = DependencyContainer.new do
 
   define_factory(:aaib_report_builder) {
     AaibReportBuilder.new(
-      get(:validatable_aaib_report_factory),
+      get(:validatable_entity_factories).aaib_report_factory,
       IdGenerator,
     )
   }
 
-  define_factory(:validatable_aaib_report_factory) {
-  }
-
   define_factory(:drug_safety_update_builder) {
     DrugSafetyUpdateBuilder.new(
-      get(:validatable_drug_safety_update_factory),
+      get(:validatable_entity_factories).drug_safety_update_factory,
       IdGenerator,
     )
   }
 
   define_factory(:medical_safety_alert_builder) {
     MedicalSafetyAlertBuilder.new(
-      get(:validatable_medical_safety_alert_factory),
+      get(:validatable_entity_factories).medical_safety_alert_factory,
       IdGenerator,
     )
-  }
-
-  define_factory(:validatable_drug_safety_update_factory) {
-    ->(*args) {
-      SlugUniquenessValidator.new(
-        get(:drug_safety_update_repository),
-        DrugSafetyUpdateValidator.new(
-          get(:drug_safety_update_factory).call(*args),
-        ),
-      )
-    }
-  }
-
-  define_factory(:validatable_medical_safety_alert_factory) {
-    ->(*args) {
-      SlugUniquenessValidator.new(
-        get(:medical_safety_alert_repository),
-        MedicalSafetyAlertValidator.new(
-          get(:medical_safety_alert_factory).call(*args),
-        ),
-      )
-    }
-  }
-
-  define_factory(:drug_safety_update_factory) {
-    ->(*args) {
-      DrugSafetyUpdate.new(
-        SpecialistDocument.new(
-          SlugGenerator.new(prefix: "drug-safety-update"),
-          get(:edition_factory),
-          *args,
-        )
-      )
-    }
-  }
-
-  define_factory(:medical_safety_alert_factory) {
-    ->(*args) {
-      MedicalSafetyAlert.new(
-        SpecialistDocument.new(
-          SlugGenerator.new(prefix: "drug-device-alerts"),
-          get(:edition_factory),
-          *args,
-        )
-      )
-    }
   }
 
   define_factory(:international_development_fund_builder) {
     InternationalDevelopmentFundBuilder.new(
-      get(:validatable_international_development_fund_factory),
+      get(:validatable_entity_factories).international_development_fund_factory,
       IdGenerator,
     )
-  }
-
-  define_factory(:validatable_international_development_fund_factory) {
-    ->(*args) {
-      SlugUniquenessValidator.new(
-        get(:international_development_fund_repository),
-        InternationalDevelopmentFundValidator.new(
-          InternationalDevelopmentFund.new(
-            SpecialistDocument.new(
-              SlugGenerator.new(prefix: "international-development-funding"),
-              get(:edition_factory),
-              *args,
-            )
-          )
-        )
-      )
-    }
   }
 
   define_factory(:manual_document_builder) {

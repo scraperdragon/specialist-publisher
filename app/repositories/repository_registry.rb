@@ -20,21 +20,21 @@ class RepositoryRegistry
   def drug_safety_update_repository
     SpecialistDocumentRepository.new(
       specialist_document_editions: SpecialistDocumentEdition.where(document_type: "drug_safety_update"),
-      document_factory: get(:validatable_drug_safety_update_factory),
+      document_factory: entity_factories.drug_safety_update_factory,
     )
   end
 
   def medical_safety_alert_repository
     SpecialistDocumentRepository.new(
       specialist_document_editions: SpecialistDocumentEdition.where(document_type: "medical_safety_alert"),
-      document_factory: get(:validatable_medical_safety_alert_factory),
+      document_factory: entity_factories.medical_safety_alert_factory,
     )
   end
 
   def international_development_fund_repository
     SpecialistDocumentRepository.new(
       specialist_document_editions: SpecialistDocumentEdition.where(document_type: "international_development_fund"),
-      document_factory: get(:validatable_international_development_fund_factory),
+      document_factory: entity_factories.international_development_fund_factory,
     )
   end
 
@@ -54,7 +54,7 @@ class EntityFactoryRegistry
           SlugGenerator.new(prefix: "aaib-reports"),
           edition_factory,
           *args,
-        )
+        ),
       )
     }
   end
@@ -64,6 +64,42 @@ class EntityFactoryRegistry
       CmaCase.new(
         SpecialistDocument.new(
           SlugGenerator.new(prefix: "cma-cases"),
+          edition_factory,
+          *args,
+        ),
+      )
+    }
+  end
+
+  def drug_safety_update_factory
+    ->(*args){
+      DrugSafetyUpdate.new(
+        SpecialistDocument.new(
+          SlugGenerator.new(prefix: "drug-safety-update"),
+          edition_factory,
+          *args,
+        )
+      )
+    }
+  end
+
+  def medical_safety_alert_factory
+    ->(*args) {
+      MedicalSafetyAlert.new(
+        SpecialistDocument.new(
+          SlugGenerator.new(prefix: "drug-device-alerts"),
+          edition_factory,
+          *args,
+        )
+      )
+    }
+  end
+
+  def international_development_fund_factory
+    ->(*args){
+      InternationalDevelopmentFund.new(
+        SpecialistDocument.new(
+          SlugGenerator.new(prefix: "international-development-funding"),
           edition_factory,
           *args,
         ),
@@ -99,9 +135,31 @@ class ValidatableEntityFactoryRegistry
     }
   end
 
+  def drug_safety_update_factory
+    ->(*args){
+      DrugSafetyUpdateValidator.new(
+        entity_factory_registry.drug_safety_update_factory.call(*args),
+      )
+    }
+  end
+
+  def medical_safety_alert_factory
+    ->(*args){
+      MedicalSafetyAlertValidator.new(
+        entity_factory_registry.medical_safety_alert_factory.call(*args),
+      )
+    }
+  end
+
+  def international_development_fund_factory
+    ->(*args){
+      InternationalDevelopmentFundValidator.new(
+        entity_factory_registry.international_development_fund_factory.call(*args),
+      )
+    }
+  end
+
 private
 
-
-  attr_reader :entity_factory_registry
   attr_reader :entity_factory_registry
 end
